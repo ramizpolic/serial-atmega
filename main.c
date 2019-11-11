@@ -91,7 +91,7 @@ ISR(USART_RX_vect)
 }
 
 /// Transmit result
-void transmit_recieved(void) {
+void transmit_received(void) {
 	if(rx_line[0] != '\0') {
 		// Print current input
 		serial_string("input: ");
@@ -116,6 +116,6 @@ int main(void){
 		wait_transmission();
 		
 		// read and send input back
-		transmit_recieved();
+		transmit_received();
 	}	
 }
