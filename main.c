@@ -15,6 +15,7 @@
 #define RX_BUFFER_SIZE	512
 #define RX_LINE_SIZE	128
 
+#include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -73,25 +74,22 @@ void wait_transmission(void) {
 ISR(USART_RX_vect)
 {
 	// empty line buffer
-	if(waiting == 0)
-		rx_line_pos = 0;
+	if(waiting == 0) 
+		memset(rx_line, 0, RX_LINE_SIZE);
+	
 	// block
 	waiting = 1;
     
-	// receive line
+	// receive data
+    rx_buffer[rx_read_pos] = UDR0;
     rx_line[rx_line_pos] = UDR0;
-    rx_line_pos++;
-	
-	// append to buffer
-	if(UDR0 != 's' && UDR0 != 'r') {
-		rx_buffer[rx_read_pos] = UDR0;
-		rx_read_pos++;
-	}
+	rx_read_pos++;
+	rx_line_pos++;
 	
 	// Handle interrupt 
 	if(rx_line_pos >= RX_LINE_SIZE || UDR0 == '\n' || UDR0 == '\0') {
-		rx_line[rx_line_pos] = '\0';
-		
+		rx_line_pos = 0;
+			
 		// unblock
 		waiting = 0;
 	}
@@ -100,7 +98,7 @@ ISR(USART_RX_vect)
     if(rx_read_pos >= RX_BUFFER_SIZE)
     {
         rx_read_pos = 0;
-        memset(rx_buffer, '\0', RX_BUFFER_SIZE);
+        memset(rx_buffer, 0, RX_BUFFER_SIZE);
     }
 }
 
@@ -109,48 +107,43 @@ ISR(USART_RX_vect)
 /************************************************************************/
 void save(char* data, int len) {
 	eeprom_write_block((const void *)data, (void *)0, len);
-	serial_string("Data saved to EEPROM.");
+	serial_string("Data saved to EEPROM. Data:");
+	serial_string("\n----------------\n");
 	serial_string(data);
-	serial_break();
+	serial_string("\n----------------\n");
 }
 
 void load(char* dest, int len) {
-	char data[RX_BUFFER_SIZE];
-	eeprom_read_block((void *)data , (const void *)0 , RX_BUFFER_SIZE);
-	serial_string("Data loaded from EEPROM.");
-	serial_string(data);
-	serial_break();
+	eeprom_read_block((void *)dest , (const void *)0 , RX_BUFFER_SIZE);
+	serial_string("Data loaded from EEPROM. Data:");
+	serial_string("\n----------------\n");
+	serial_string(dest);
+	serial_string("\n----------------\n");
 }
 
 /************************************************************************/
 /* Logic handler                                                        */
 /************************************************************************/
 void logic_handler() {
-	// check if command
-	//if(rx_line[0] == 's') {
-	//	save(rx_buffer, RX_BUFFER_SIZE);
-	//}
-	//else if(rx_line[0] == 'r') {
-	//	char data[RX_BUFFER_SIZE];
-	//	load(data, RX_BUFFER_SIZE);
-	//}
-	//else {
-		// Print result
-		//float f = sin(atof(rx_line)); 
-		//char output[15];
-		//snprintf(output, 15, "%f", f);
-	if(rx_line[0] != '\0') {
+	// check commands
+	if(strcmp(rx_line, "save") == 0) {
+		save(rx_buffer, RX_BUFFER_SIZE);
+	}
+	else if(strcmp(rx_line, "load") == 0) {
+		char data[RX_BUFFER_SIZE];
+		load(data, RX_BUFFER_SIZE);
+	}	
+	else if(strcmp(rx_line, "all") == 0) {
+		// Print all results so far
+		serial_string("all results: \n");
+		serial_string(rx_buffer);
+		serial_break();
+	}
+	else if(rx_line[0] != '\0') {
 		serial_string("input: ");
 		serial_string(rx_line);
+		serial_break();
 	}
-		//serial_string("f(x) = sin(x) = ");
-		//serial_string(output);
-		
-		// Print all results so far
-		// serial_string("all results: ");
-		// serial_string(rx_buffer);
-		// serial_break();
-	//}
 }
 
 int main(void){
@@ -159,13 +152,16 @@ int main(void){
 	sei();
 	
 	// Preview commands
-	serial_string("Commands: \n 's' - save all results sent via UART to EEPROM\n 'r' - load saved results from EEPROM\n");
-	serial_string(" 'x' - value for which to perform f(x) = sin(x)");
+	serial_string("Commands: \n 'save' - save all results sent via UART to EEPROM\n 'load' - load saved results from EEPROM\n");
+	serial_string("'all' - show buffer data \n 'x' - send data");
 	serial_break();
 	
 	// Loop until dead
 	for(;;){
+		// wait until received
 		wait_transmission();
+		
+		// perform operations
 		logic_handler();
 	}	
 }
