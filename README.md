@@ -2,6 +2,10 @@
 Implements bidirectional serial communication via USART, and allows the data packages to be stored internally into non-volatile memory such as EEPROM. 
 It supports all the basic AVR microcontrollers, but is mainly designed to work with **Atmega128** and **Atmega328/P**.
 
+### References
+  * [Atmega328P Datasheet](https://www.sparkfun.com/datasheets/Components/SMD/ATMega328.pdf)
+  * [AVR GCC Libraries](https://www.nongnu.org/avr-libc/user-manual/)
+  * [Using Arduino Boards in Atmel Studio](http://www.microdigitaled.com/AVR/Hardware/Arduino/UsingArduinoBoardsInAtmelStudio.pdf)
 
 ## Requirements
 #### Board
@@ -10,9 +14,9 @@ It supports all the basic AVR microcontrollers, but is mainly designed to work w
 * EEPROM
 
 #### Softwares and libraries
-* Atmel Studio 7.0
-* avrdude
-* realterm
+* [Atmel Studio 7.0](https://www.microchip.com/mplab/avr-support/atmel-studio-7)
+* [avrdude](https://www.nongnu.org/avrdude/)
+* [realterm](https://sourceforge.net/projects/realterm/)
 
 
 ## Configuration
@@ -28,7 +32,8 @@ UCSR0C|=(1<<UCSZ01)|(1<<UCSZ01);  // no parity, 1 stop bit, 8-bit data
 
 
 ## Build
-* Open Atmel Studio 7
+* Open Atmel Studio 7.0
+* Clone project
 * Load project
 * Build project
 * Launch from project path
@@ -79,5 +84,5 @@ And obtain the result as:
 -> ----------------
 ```
 
-
 ***
+Author: [Ramiz Polic](https://github.com/fhivemind)
