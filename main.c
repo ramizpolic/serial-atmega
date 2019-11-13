@@ -43,7 +43,7 @@ void serial_init(){
 /************************************************************************/
 void serial_char(unsigned char data){
 	// send a single char via USART, wait then transmit
-	while(!(UCSR0A&(1<<UDRE0)));
+	while(!(UCSR0A & (1<<UDRE0)));
 	UDR0 = data;
 }
 
@@ -67,39 +67,38 @@ void serial_string(char* s) {
 /************************************************************************/
 /* Interrupt Service Routine Receiver Handler							*/
 /************************************************************************/
-void wait_transmission(void) {
-	while(waiting == 1);
-}
-
 ISR(USART_RX_vect)
 {
 	// empty line buffer
-	if(waiting == 0) 
+	if(waiting == 0)
 		memset(rx_line, 0, RX_LINE_SIZE);
 	
 	// block
 	waiting = 1;
-    
+	
 	// receive data
-    rx_buffer[rx_read_pos] = UDR0;
-    rx_line[rx_line_pos] = UDR0;
+	rx_buffer[rx_read_pos] = UDR0;
+	rx_line[rx_line_pos] = UDR0;
 	rx_read_pos++;
 	rx_line_pos++;
 	
 	// Handle interrupt 
-	if(rx_line_pos >= RX_LINE_SIZE || UDR0 == '\n' || UDR0 == '\0') {
+	if(rx_line_pos >= RX_LINE_SIZE || UDR0 == '\0' || UDR0 == 'E') {
 		rx_line_pos = 0;
-			
+		
+		// handle
+		logic_handler();
+		
 		// unblock
 		waiting = 0;
 	}
 	
-	// Handle overflows
-    if(rx_read_pos >= RX_BUFFER_SIZE)
-    {
-        rx_read_pos = 0;
-        memset(rx_buffer, 0, RX_BUFFER_SIZE);
-    }
+	// Handle overflow
+	if(rx_read_pos >= RX_BUFFER_SIZE)
+	{
+		rx_read_pos = 0;
+		memset(rx_buffer, 0, RX_BUFFER_SIZE);
+	}
 }
 
 /************************************************************************/
@@ -107,16 +106,16 @@ ISR(USART_RX_vect)
 /************************************************************************/
 void save(char* data, int len) {
 	eeprom_write_block((const void *)data, (void *)0, len);
-	serial_string("Data saved to EEPROM. Data:");
-	serial_string("\n----------------\n");
+	serial_string("Data saved to EEPROM.");
+	serial_string("\n----- DATA -----\n");
 	serial_string(data);
 	serial_string("\n----------------\n");
 }
 
 void load(char* dest, int len) {
 	eeprom_read_block((void *)dest , (const void *)0 , RX_BUFFER_SIZE);
-	serial_string("Data loaded from EEPROM. Data:");
-	serial_string("\n----------------\n");
+	serial_string("Data loaded from EEPROM.");
+	serial_string("\n----- DATA -----\n");
 	serial_string(dest);
 	serial_string("\n----------------\n");
 }
@@ -157,11 +156,7 @@ int main(void){
 	serial_break();
 	
 	// Loop until dead
-	for(;;){
-		// wait until received
-		wait_transmission();
-		
-		// perform operations
-		logic_handler();
+	for(;;){		
+		// do nothing here
 	}	
 }
