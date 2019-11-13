@@ -55,7 +55,7 @@ Commands:
  
 `hello world\n`, `Oh, hi Mark\n`, `all\n`, `save\n`, `load\n`
  
-Following response should be visible:
+And obtain the result as:
  ```bash
  # input 1
 -> input: hello world
