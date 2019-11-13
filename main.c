@@ -22,7 +22,7 @@
 #include <avr/eeprom.h>
 
 // Globals
-unsigned char rx_buffer[RX_BUFFER_SIZE], rx_line[RX_LINE_SIZE];
+volatile unsigned char rx_buffer[RX_BUFFER_SIZE], rx_line[RX_LINE_SIZE];
 volatile unsigned char rx_buffer_pos=0, rx_line_pos=0;
 volatile short waiting = 1;
 
