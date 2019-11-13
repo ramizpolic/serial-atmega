@@ -39,7 +39,7 @@ UCSR0C|=(1<<UCSZ01)|(1<<UCSZ01);  // no parity, 1 stop bit, 8-bit data
 * Launch from project path
   ```
   avrdude -C "/path/to/avrdude.conf" -p atmega328p -c arduino -P {PORT} \
-  -b 9600 -U flash:w:"$(ProjectDir)Debug\$(TargetName).hex":i 
+  -b 115200 -U flash:w:"$(ProjectDir)Debug\$(TargetName).hex":i 
   ```
 * Open and configure **realterm**
 * Start communication
