@@ -23,14 +23,14 @@
 
 // Globals
 unsigned char rx_buffer[RX_BUFFER_SIZE], rx_line[RX_LINE_SIZE];
-volatile unsigned char rx_read_pos=0, rx_line_pos=0;
+volatile unsigned char rx_buffer_pos=0, rx_line_pos=0;
 volatile short waiting = 1;
 
 /************************************************************************/
 /* Init module                                                          */
 /************************************************************************/
 void serial_init(){
-	// initialize USART
+	// Initialize USART
 	UBRR0=UBRR_VALUE;				  // set baud rate
 	UCSR0B|=(1<<TXEN0);				  // enable TX
 	UCSR0B|=(1<<RXEN0);				  // enable RX
@@ -42,7 +42,6 @@ void serial_init(){
 /* Adding transmit modules                                              */
 /************************************************************************/
 void serial_char(unsigned char data){
-	// send a single char via USART, wait then transmit
 	while(!(UCSR0A & (1<<UDRE0)));
 	UDR0 = data;
 }
@@ -50,11 +49,6 @@ void serial_char(unsigned char data){
 void serial_break(){
 	serial_char(10); // LF 
 	serial_char(13); // CR
-}
-
-void serial_comma(){
-	serial_char(',');
-	serial_char(' ');
 }
 
 void serial_string(char* s) {
@@ -73,30 +67,30 @@ ISR(USART_RX_vect)
 	if(waiting == 0)
 		memset(rx_line, 0, RX_LINE_SIZE);
 	
-	// block
+	// Block
 	waiting = 1;
 	
-	// receive data
+	// Receive data
 	unsigned char input = UDR0;
 	if(input != '\n')
 		rx_line[rx_line_pos++] = input;
 	
 	// Handle interrupt 
 	if(rx_line_pos >= RX_LINE_SIZE || (input == '\n' && rx_line_pos > 0)) {				
-		// handle
+		// Handle result
 		logic_handler();
 		
-		// resize
+		// Resize
 		rx_line_pos = 0;
 		
-		// unblock
+		// Unblock
 		waiting = 0;
 	}
 	
 	// Handle overflow
-	if(rx_read_pos >= RX_BUFFER_SIZE)
+	if(rx_buffer_pos >= RX_BUFFER_SIZE)
 	{
-		rx_read_pos = 0;
+		rx_buffer_pos = 0;
 		memset(rx_buffer, 0, RX_BUFFER_SIZE);
 	}
 }
@@ -124,7 +118,7 @@ void load(char* dest, int len) {
 /* Logic handler                                                        */
 /************************************************************************/
 void logic_handler() {
-	// check commands
+	// Check commands
 	if(strcmp(rx_line, "save") == 0) {
 		save(rx_buffer, RX_BUFFER_SIZE);
 	}
@@ -147,9 +141,9 @@ void logic_handler() {
 		
 		// Append to buffer
 		short int i = 0;
-		while(rx_read_pos+1 < RX_BUFFER_SIZE && i < rx_line_pos)
-			rx_buffer[rx_read_pos++] = rx_line[i++];
-		rx_buffer[rx_read_pos++] = '\n';
+		while(rx_buffer_pos+1 < RX_BUFFER_SIZE && i < rx_line_pos)
+			rx_buffer[rx_buffer_pos++] = rx_line[i++];
+		rx_buffer[rx_buffer_pos++] = '\n';
 	}
 }
 
