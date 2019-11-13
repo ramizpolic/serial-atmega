@@ -86,13 +86,6 @@ ISR(USART_RX_vect)
 		// Unblock
 		waiting = 0;
 	}
-	
-	// Handle overflow
-	if(rx_buffer_pos >= RX_BUFFER_SIZE)
-	{
-		rx_buffer_pos = 0;
-		memset(rx_buffer, 0, RX_BUFFER_SIZE);
-	}
 }
 
 /************************************************************************/
@@ -144,6 +137,13 @@ void logic_handler() {
 		while(rx_buffer_pos+1 < RX_BUFFER_SIZE && i < rx_line_pos)
 			rx_buffer[rx_buffer_pos++] = rx_line[i++];
 		rx_buffer[rx_buffer_pos++] = '\n';
+	
+		// Handle overflow
+		if(rx_buffer_pos >= RX_BUFFER_SIZE)
+		{
+			rx_buffer_pos = 0;
+			memset(rx_buffer, 0, RX_BUFFER_SIZE);
+		}
 	}
 }
 
