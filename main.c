@@ -69,7 +69,7 @@ void serial_string(char* s) {
 /************************************************************************/
 ISR(USART_RX_vect)
 {
-	// empty line buffer
+	// Empty buffer
 	if(waiting == 0)
 		memset(rx_line, 0, RX_LINE_SIZE);
 	
@@ -77,17 +77,17 @@ ISR(USART_RX_vect)
 	waiting = 1;
 	
 	// receive data
-	rx_buffer[rx_read_pos] = UDR0;
-	rx_line[rx_line_pos] = UDR0;
-	rx_read_pos++;
-	rx_line_pos++;
+	unsigned char input = UDR0;
+	if(input != '\n')
+		rx_line[rx_line_pos++] = input;
 	
 	// Handle interrupt 
-	if(rx_line_pos >= RX_LINE_SIZE || UDR0 == '\0' || UDR0 == 'E') {
-		rx_line_pos = 0;
-		
+	if(rx_line_pos >= RX_LINE_SIZE || (input == '\n' && rx_line_pos > 0)) {				
 		// handle
 		logic_handler();
+		
+		// resize
+		rx_line_pos = 0;
 		
 		// unblock
 		waiting = 0;
@@ -129,6 +129,7 @@ void logic_handler() {
 		save(rx_buffer, RX_BUFFER_SIZE);
 	}
 	else if(strcmp(rx_line, "load") == 0) {
+		// Do something with load
 		char data[RX_BUFFER_SIZE];
 		load(data, RX_BUFFER_SIZE);
 	}	
@@ -139,9 +140,16 @@ void logic_handler() {
 		serial_break();
 	}
 	else if(rx_line[0] != '\0') {
+		// Preview current
 		serial_string("input: ");
 		serial_string(rx_line);
 		serial_break();
+		
+		// Append to buffer
+		short int i = 0;
+		while(rx_read_pos+1 < RX_BUFFER_SIZE && i < rx_line_pos)
+			rx_buffer[rx_read_pos++] = rx_line[i++];
+		rx_buffer[rx_read_pos++] = '\n';
 	}
 }
 
@@ -152,7 +160,7 @@ int main(void){
 	
 	// Preview commands
 	serial_string("Commands: \n 'save' - save all results sent via UART to EEPROM\n 'load' - load saved results from EEPROM\n");
-	serial_string("'all' - show buffer data \n 'x' - send data");
+	serial_string(" 'all' - show buffer data \n 'x' - send data");
 	serial_break();
 	
 	// Loop until dead
