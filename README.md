@@ -32,9 +32,11 @@ UCSR0C|=(1<<UCSZ01)|(1<<UCSZ01);  // no parity, 1 stop bit, 8-bit data
 
 
 ## Build
+#### On Windows
+* Clone repository
 * Open Atmel Studio 7.0
-* Clone project
-* Load project
+* New Atmel project
+* Import main.c
 * Build project
 * Launch from project path
   ```
@@ -44,6 +46,21 @@ UCSR0C|=(1<<UCSZ01)|(1<<UCSZ01);  // no parity, 1 stop bit, 8-bit data
 * Open and configure **realterm**
 * Start communication
 
+#### On Linux
+```bash
+# install required packages
+$ sudo apt install avrdude gcc-avr gcc
+$ sudo apt-get install gcc-multilib g++-multilib
+$ sudo apt-get install avr-libc gcc-avr
+
+# open Makefile and configure data
+$ nano Makefile
+
+# build and flash
+$ git clone https://github.com/fhivemind/serial-atmega.git
+$ make
+$ make flash
+```
 ---
 
 ## Demo
