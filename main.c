@@ -15,7 +15,6 @@
 #define RX_BUFFER_SIZE  512
 #define RX_LINE_SIZE    128
 
-#include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -25,6 +24,9 @@
 volatile unsigned char rx_buffer[RX_BUFFER_SIZE], rx_line[RX_LINE_SIZE];
 volatile unsigned char rx_buffer_pos=0, rx_line_pos=0;
 volatile short waiting = 1;
+
+// External functions
+static inline int compare_string(char*, char*);
 
 /************************************************************************/
 /* Init module                                                          */
@@ -41,7 +43,7 @@ void serial_init(){
 /************************************************************************/
 /* Adding transmit modules                                              */
 /************************************************************************/
-void serial_char(unsigned char data){
+void inline serial_char(unsigned char data){
 	while(!(UCSR0A & (1<<UDRE0)));
 	UDR0 = data;
 }
@@ -110,15 +112,15 @@ void load(char* dest, int len) {
 /************************************************************************/
 void logic_handler() {
 	// Check commands
-	if(strcmp(rx_line, "save") == 0) {
+	if(compare_string(rx_line, "save")) {
 		save(rx_buffer, RX_BUFFER_SIZE);
 	}
-	else if(strcmp(rx_line, "load") == 0) {
+	else if(compare_string(rx_line, "load")) {
 		// Do something with load
 		char data[RX_BUFFER_SIZE];
 		load(data, RX_BUFFER_SIZE);
 	}
-	else if(strcmp(rx_line, "all") == 0) {
+	else if(compare_string(rx_line, "all")) {
 		// Print all results so far
 		serial_string("all results: \n");
 		serial_string(rx_buffer);
@@ -156,7 +158,21 @@ int main(void){
 	serial_break();
 
 	// Loop until dead
-	for(;;){
+	while(1) {
 		// do nothing here
 	}
+}
+
+/************************************************************************/
+/* External functions                                                   */
+/************************************************************************/
+static inline int compare_string(char *first, char *second) {
+   	while (*first == *second && *first != '\0' && *second != '\0') {
+      	first++;
+      	second++;
+   	}
+
+	// 0 -> not equal
+	// 1 -> equal
+	return *first == '\0' && *second == '\0';
 }
