@@ -52,10 +52,8 @@ void serial_break(){
 }
 
 void serial_string(char* s) {
-	while (*s != '\0') {
-		serial_char(*s);
-		s++;
-	}
+	while (*s != '\0')
+		serial_char(*s++);
 }
 
 /************************************************************************/
@@ -75,7 +73,7 @@ ISR(USART_RX_vect)
 	if(input != '\n')
 		rx_line[rx_line_pos++] = input;
 
-	// Handle interrupt 
+	// Handle interrupt
 	if(rx_line_pos >= RX_LINE_SIZE || (input == '\n' && rx_line_pos > 0)) {
 		// Handle result
 		logic_handler();
@@ -100,7 +98,7 @@ void save(char* data, int len) {
 }
 
 void load(char* dest, int len) {
-	eeprom_read_block((void *)dest , (const void *)0 , RX_BUFFER_SIZE);
+	eeprom_read_block((void *)dest , (const void *)0 , len);
 	serial_string("Data loaded from EEPROM.");
 	serial_string("\n----- DATA -----\n");
 	serial_string(dest);
