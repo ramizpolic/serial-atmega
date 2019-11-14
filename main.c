@@ -167,10 +167,10 @@ int main(void){
 /* External functions                                                   */
 /************************************************************************/
 static inline int compare_string(char *first, char *second) {
-   	while (*first == *second && *first != '\0' && *second != '\0') {
-      	first++;
-      	second++;
-   	}
+	while (*first == *second && *first != '\0' && *second != '\0') {
+		first++;
+		second++;
+	}
 
 	// 0 -> not equal
 	// 1 -> equal
