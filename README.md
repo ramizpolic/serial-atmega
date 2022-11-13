@@ -49,9 +49,7 @@ UCSR0C|=(1<<UCSZ01)|(1<<UCSZ01);  // no parity, 1 stop bit, 8-bit data
 #### On Linux
 ```bash
 # install required packages
-$ sudo apt install avrdude gcc-avr gcc
-$ sudo apt-get install gcc-multilib g++-multilib
-$ sudo apt-get install avr-libc gcc-avr
+$ sudo apt install avrdude gcc-avr gcc gcc-multilib g++-multilib avr-libc gcc-avr
 
 # open Makefile and configure data
 $ nano Makefile
@@ -67,10 +65,10 @@ $ make flash
 Once the program has been successfully flashed onto the controller, and the serial port opened, we can initiate the communication. When opening the realterm (or any other serial monitor), after properly configuring it first, you should see following:
 ```bash
 Commands: 
- 'save' - save all results sent via UART to EEPROM
- 'load' - load saved results from EEPROM
- 'all' - show buffer data 
- 'x' - send data
+ '/save' - save all results sent via UART to EEPROM
+ '/load' - load saved results from EEPROM
+ '/all' - show buffer data 
+ '{DATA}' - send data
  ```
  #### Tests
  We will send following data in packages (`\n` indicates end of transmission): 
@@ -83,17 +81,17 @@ And obtain the result as:
 -> input: hello world
  # input 2
 -> input: Oh, hi Mark
- # command 'all'
+ # command '/all'
 -> all results: 
 -> hello world
 -> Oh, hi Mark
- # command 'save'
+ # command '/save'
 -> Data saved to EEPROM.
 -> ----- DATA -----
 -> hello world
 -> Oh, hi Mark
 -> ----------------
- # command 'load'
+ # command '/load'
 -> Data loaded from EEPROM.
 -> ----- DATA -----
 -> hello world
