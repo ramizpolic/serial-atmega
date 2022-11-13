@@ -33,10 +33,10 @@ static inline int compare_string(char*, char*);
 /************************************************************************/
 void serial_init(){
 	// Initialize USART
-	UBRR0=UBRR_VALUE;					// set baud rate
-	UCSR0B|=(1<<TXEN0);					// enable TX
-	UCSR0B|=(1<<RXEN0);					// enable RX
-	UCSR0B|=(1<<RXCIE0);				// RX complete interrupt
+	UBRR0=UBRR_VALUE;			// set baud rate
+	UCSR0B|=(1<<TXEN0);			// enable TX
+	UCSR0B|=(1<<RXEN0);			// enable RX
+	UCSR0B|=(1<<RXCIE0);			// RX complete interrupt
 	UCSR0C|=(1<<UCSZ01)|(1<<UCSZ01); 	// no parity, 1 stop bit, 8-bit data
 }
 
@@ -59,7 +59,7 @@ void serial_string(char* s) {
 }
 
 /************************************************************************/
-/* Interrupt Service Routine Receiver Handler							*/
+/* Interrupt Service Routine Receiver Handler				*/
 /************************************************************************/
 ISR(USART_RX_vect)
 {
@@ -89,7 +89,7 @@ ISR(USART_RX_vect)
 }
 
 /************************************************************************/
-/* Read/Write EEPROM												*/
+/* Read/Write EEPROM							*/
 /************************************************************************/
 void save(char* data, int len) {
 	eeprom_write_block((const void *)data, (void *)0, len);
@@ -112,15 +112,15 @@ void load(char* dest, int len) {
 /************************************************************************/
 void logic_handler() {
 	// Check commands
-	if(compare_string(rx_line, "save")) {
+	if(compare_string(rx_line, "/save")) {
 		save(rx_buffer, RX_BUFFER_SIZE);
 	}
-	else if(compare_string(rx_line, "load")) {
+	else if(compare_string(rx_line, "/load")) {
 		// Do something with load
 		char data[RX_BUFFER_SIZE];
 		load(data, RX_BUFFER_SIZE);
 	}
-	else if(compare_string(rx_line, "all")) {
+	else if(compare_string(rx_line, "/all")) {
 		// Print all results so far
 		serial_string("all results: \n");
 		serial_string(rx_buffer);
@@ -153,8 +153,8 @@ int main(void){
 	sei();
 
 	// Preview commands
-	serial_string("Commands: \n 'save' - save all results sent via UART to EEPROM\n 'load' - load saved results from EEPROM\n");
-	serial_string(" 'all' - show buffer data \n 'x' - send data");
+	serial_string("Commands: \n '/save' - save all results sent via UART to EEPROM\n '/load' - load saved results from EEPROM\n");
+	serial_string(" '/all' - show buffer data \n '{DATA}' - send data");
 	serial_break();
 
 	// Loop until dead
